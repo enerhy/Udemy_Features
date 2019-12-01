@@ -3,6 +3,30 @@
 -----Important----
 #In all feature selection procedures, it is good practice to select the features by examining only the training set. And this is to avoid overfit
 
+Compare performance in machine learning models
+#With Random Forest
+def run_randomForests(X_train, X_test, y_train, y_test):
+    rf = RandomForestClassifier(n_estimators=200, random_state=39, max_depth=4)
+    rf.fit(X_train, y_train)
+    print('Train set')
+    pred = rf.predict_proba(X_train)
+    print('Random Forests roc-auc: {}'.format(roc_auc_score(y_train, pred[:,1])))
+    print('Test set')
+    pred = rf.predict_proba(X_test)
+    print('Random Forests roc-auc: {}'.format(roc_auc_score(y_test, pred[:,1])))
+
+# original
+run_randomForests(X_train_original.drop(labels=['ID'], axis=1),
+                  X_test_original.drop(labels=['ID'], axis=1),
+                  y_train, y_test)
+    
+# filter methods - correlation
+run_randomForests(X_train.drop(labels=['ID'], axis=1),
+                  X_test.drop(labels=['ID'], axis=1),
+                  y_train, y_test)
+
+
+------------
 
 #Constant Features
 #Check for null values
