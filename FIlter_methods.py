@@ -26,6 +26,34 @@ run_randomForests(X_train.drop(labels=['ID'], axis=1),
                   y_train, y_test)
 
 
+#With Logistic Regression
+# create a function to build logistic regression and compare performance in train and test set
+
+def run_logistic(X_train, X_test, y_train, y_test):
+    # function to train and test the performance of logistic regression
+    logit = LogisticRegression(random_state=44)
+    logit.fit(X_train, y_train)
+    print('Train set')
+    pred = logit.predict_proba(X_train)
+    print('Logistic Regression roc-auc: {}'.format(roc_auc_score(y_train, pred[:,1])))
+    print('Test set')
+    pred = logit.predict_proba(X_test)
+    print('Logistic Regression roc-auc: {}'.format(roc_auc_score(y_test, pred[:,1])))
+    
+# original
+# for logistic regression features need to be in the same scale
+
+# original
+scaler = StandardScaler().fit(X_train_original.drop(labels=['ID'], axis=1))
+
+run_logistic(scaler.transform(X_train_original.drop(labels=['ID'], axis=1)),
+             scaler.transform(X_test_original.drop(labels=['ID'], axis=1)),
+                  y_train, y_test)
+
+
+
+
+
 ------------
 
 #Constant Features
@@ -45,6 +73,16 @@ sum(sel.get_support())
 #Transforming the datasets by the constant features
 X_train = sel.transform(X_train)
 X_test = sel.transform(X_test)
+
+# sklearn transformations lead to numpy arrays. here I transform the arrays back to dataframes
+# please be mindful of getting the columns assigned correctly
+features_to_keep = X_train.columns[sel.get_support()]
+
+X_train= pd.DataFrame(X_train)
+X_train.columns = features_to_keep
+
+X_test= pd.DataFrame(X_test)
+X_test.columns = features_to_keep
 
 X_train.shape, X_test.shape
 
