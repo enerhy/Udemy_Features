@@ -114,9 +114,13 @@ data_t[data_t.duplicated()]
 duplicated_features = data_t[data_t.duplicated()].index.values
 duplicated_features = [col for col in data.columns if col not in data_unique.columns]
 
--creating a dataframe without the duplicate features (keeping the first feature)
+#creating a dataframe without the duplicate features (keeping the first feature)
 data_unique = data_t.drop_duplicates(keep='first').T
 data_unique.shape
+----#OR
+features_to_drop = data_t[data_t.duplicated()].index
+X_train = X_train.drop(features_to_drop, axis=1)
+
 
 
 #FOR BIG DATASETS:
@@ -237,10 +241,22 @@ importance.columns = ['feature', 'importance']
 importance.sort_values(by='importance', ascending=False)
 
 
+-----STATISTICAL RANKING FILTERING
 
-
-
-
+#ROC
+# find important features using univariate roc-auc
+# loop to build a tree, make predictions and get the roc-auc
+# for each feature of the train set
+roc_values = []
+for feature in X_train.columns:
+    clf = DecisionTreeClassifier()
+    clf.fit(X_train[feature].fillna(0).to_frame(), y_train)
+    y_scored = clf.predict_proba(X_test[feature].fillna(0).to_frame())
+    roc_values.append(roc_auc_score(y_test, y_scored[:, 1]))
+# let's add the variable names and order it for clearer visualisation
+roc_values = pd.Series(roc_values)
+roc_values.index = X_train.columns
+roc_values.sort_values(ascending=False).plot.bar(figsize=(20, 8))
 
 
 
