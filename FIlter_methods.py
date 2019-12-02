@@ -3,7 +3,8 @@
 -----Important----
 #In all feature selection procedures, it is good practice to select the features by examining only the training set. And this is to avoid overfit
 
-Compare performance in machine learning models
+
+---Compare performance in machine learning models
 #With Random Forest
 def run_randomForests(X_train, X_test, y_train, y_test):
     rf = RandomForestClassifier(n_estimators=200, random_state=39, max_depth=4)
