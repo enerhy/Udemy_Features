@@ -259,6 +259,10 @@ roc_values = pd.Series(roc_values)
 roc_values.index = X_train.columns
 roc_values.sort_values(ascending=False).plot.bar(figsize=(20, 8))
 
+#Get the columns that remain
+selected_feat = roc_values[roc_values>0.5]
+len(selected_feat), X_train.shape[1]
+
 
 -------Lasso Filtering
 #1 Train a loss function with regularization L1
@@ -276,6 +280,25 @@ X_train_selected.shape, X_test_selected.shape
 #3 Get the coulmns dropped / selected
 removed_feats = X_train.columns[(sel_.estimator_.coef_ == 0).ravel().tolist()]
 selected_feat = X_train.columns[(sel_.get_support())]
+
+
+
+------Select features by random forests derived importance
+# select features using the impotance derived from
+# random forests
+
+sel_ = SelectFromModel(RandomForestClassifier(n_estimators=400))
+sel_.fit(X_train, y_train)
+
+# remove features with zero coefficient from dataset
+# and parse again as dataframe (output of sklearn is
+# numpy array)
+X_train_rf = pd.DataFrame(sel_.transform(X_train))
+X_test_rf = pd.DataFrame(sel_.transform(X_test))
+
+# add the columns name
+X_train_rf.columns = X_train.columns[(sel_.get_support())]
+X_test_rf.columns = X_train.columns[(sel_.get_support())]
 
 
 
