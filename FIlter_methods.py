@@ -259,6 +259,23 @@ roc_values.index = X_train.columns
 roc_values.sort_values(ascending=False).plot.bar(figsize=(20, 8))
 
 
+-------Lasso Filtering
+#1 Train a loss function with regularization L1
+# linear models benefit from feature scaling
+scaler = StandardScaler()
+scaler.fit(X_train.fillna(0))
+sel_ = SelectFromModel(LogisticRegression(C=1, penalty='l1'))
+sel_.fit(scaler.transform(X_train.fillna(0)), y_train)
+
+#2 Transform train and test with the 
+X_train_selected = sel_.transform(X_train.fillna(0))
+X_test_selected = sel_.transform(X_test.fillna(0))
+X_train_selected.shape, X_test_selected.shape
+
+#3 Get the coulmns dropped / selected
+removed_feats = X_train.columns[(sel_.estimator_.coef_ == 0).ravel().tolist()]
+selected_feat = X_train.columns[(sel_.get_support())]
+
 
 
 
