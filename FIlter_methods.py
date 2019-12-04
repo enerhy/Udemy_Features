@@ -167,6 +167,7 @@ def correlation(dataset, threshold):
                 col_corr.add(colname)
     return col_corr
 
+corr_features = correlation(X_train, 0.8)
 X_train.drop(labels=corr_features, axis=1, inplace=True)
 X_test.drop(labels=corr_features, axis=1, inplace=True)
 X_train.shape, X_test.shape
