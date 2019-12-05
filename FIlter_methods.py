@@ -302,4 +302,161 @@ X_test_rf.columns = X_train.columns[(sel_.get_support())]
 
 
 
+--------Select features based on Hybrid recursive feature addition
+# the first step of this procedure  consists in building
+# a machine learning algorithm using all the available features
+# and then determine the importance of the features according
+# to the algorithm
 
+# set the seed for reproducibility
+seed_val = 1000000000
+np.random.seed(seed_val)
+
+# 1: build initial model using all the features
+model_all_features = xgb.XGBClassifier(
+    nthread=10, max_depth=4, n_estimators=500, learning_rate=0.05)
+
+model_all_features.fit(X_train, y_train)
+
+# calculate the roc-auc in the test set
+y_pred_test = model_all_features.predict_proba(X_test)[:, 1]
+auc_score_all = roc_auc_score(y_test, y_pred_test)
+print('Test all features xgb ROC AUC=%f' % (auc_score_all))
+
+# 2: the second step consist of deriving the importance of 
+# each feature and ranking them from the most to the least important
+
+# get feature name and importance
+features = pd.Series(model_all_features.feature_importances_)
+features.index = X_train.columns
+# sort the features by importance
+features.sort_values(ascending=False, inplace=True)
+# plot
+features.plot.bar(figsize=(20,6))
+
+# view the list of ordered features
+features = list(features.index)
+features
+
+
+# 3: next, we need to build a machine learning
+# algorithm using only the most important feature
+
+# set the seed for reproducibility
+seed_val = 1000000000
+np.random.seed(seed_val)
+
+# build initial model using all the features
+model_one_feature = xgb.XGBClassifier(
+    nthread=10, max_depth=4, n_estimators=500, learning_rate=0.05)
+
+# train using only the most important feature
+model_one_feature.fit(X_train[features[0]].to_frame(), y_train)
+
+# calculate the roc-auc in the test set
+y_pred_test = model_one_feature.predict_proba(X_test[features[0]].to_frame())[:, 1]
+auc_score_first = roc_auc_score(y_test, y_pred_test)
+print('Test one feature xgb ROC AUC=%f' % (auc_score_first))
+
+
+# 4 the final step consists in adding one at a time
+# all the features, from the most to the least
+# important, and build an xgboost at each round.
+
+# once we build the model, we calculate the new roc-auc
+# if the new roc-auc is bigger than the original one
+# (with one feature), then that feature that was added
+# was important, and we should keep it.
+# otherwise, we should remove the feature
+
+# recursive feature addition:
+
+# first we arbitrarily set the increase in roc-auc
+# if the increase is above this threshold,
+# the feature will be kept
+tol = 0.001
+
+print('doing recursive feature addition')
+
+# we initialise a list where we will collect the
+# features we should keep
+features_to_keep = [features[0]]
+
+# set a counter to know how far ahead the loop is going
+count = 1
+
+# now we loop over all the features, in order of importance:
+# remember that features is the list of ordered features
+# by importance
+for feature in features[1:]:
+    print()
+    print('testing feature: ', feature, ' which is feature ', count,
+          ' out of ', len(features))
+    count = count + 1
+
+    # initialise model
+    model_int = xgb.XGBClassifier(
+        nthread=10, max_depth=4, n_estimators=500, learning_rate=0.05)
+
+    # fit model with the selected features
+    # and the feature to be evaluated
+    model_int.fit(
+        X_train[features_to_keep + [feature] ], y_train)
+
+    # make a prediction over the test set
+    y_pred_test = model_int.predict_proba(
+        X_test[features_to_keep + [feature] ])[:, 1]
+
+    # calculate the new roc-auc
+    auc_score_int = roc_auc_score(y_test, y_pred_test)
+    print('New Test ROC AUC={}'.format((auc_score_int)))
+
+    # print the original roc-auc with one feature
+    print('All features Test ROC AUC={}'.format((auc_score_first)))
+
+    # determine the increase in the roc-auc
+    diff_auc = 
+    - auc_score_first
+
+    # compare the increase in roc-auc with the tolerance
+    # we set previously
+    if diff_auc >= tol:
+        print('Increase in ROC AUC={}'.format(diff_auc))
+        print('keep: ', feature)
+        print
+        # if the increase in the roc is bigger than the threshold
+        # we keep the feature and re-adjust the roc-auc to the new value
+        # considering the added feature
+        auc_score_first = auc_score_int
+        
+        # and we append the feature to keep to the list
+        features_to_keep.append(feature)
+    else:
+        # we ignore the feature
+        print('Increase in ROC AUC={}'.format(diff_auc))
+        print('remove: ', feature)
+        print
+
+
+# now the loop is finished, we evaluated all the features
+print('DONE!!')
+print('total features to keep: ', len(features_to_keep))
+
+
+# 5 build the model with the selected features
+seed_val = 1000000000
+np.random.seed(seed_val)
+
+# build initial model
+final_xgb = xgb.XGBClassifier(
+    nthread=10, max_depth=4, n_estimators=500, learning_rate=0.05)
+
+# fit the model with the selected features
+final_xgb.fit(X_train[features_to_keep], y_train)
+
+# make predictions
+y_pred_test = final_xgb.predict_proba(X_test[features_to_keep])[:, 1]
+
+# calculate roc-auc
+auc_score_final = roc_auc_score(y_test, y_pred_test)
+print('Test selected features ROC AUC=%f' % (auc_score_final))
