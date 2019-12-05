@@ -56,6 +56,6 @@ employed = len(data.dropna(subset=['emp_title']))
 # % of borrowers within each category
 data.dropna(subset=['emp_title']).groupby(
     ['emp_length_redefined'])['emp_length'].count().sort_values() / employe
-                                                   
-                                                   
-                                                   
+      
+
+																									 
