@@ -129,18 +129,103 @@ encoder.fit(X_train.fillna('Missing'))
 
 #One hot encoding with Feature-Engine
 ohe_enc = OneHotCategoricalEncoder(
-    top_categories=None,
+    top_categories=None, # we can choose to encode only top categories and see them with ohe_enc.encoder_dict
     variables=['sex', 'embarked'], # we can select which variables to encode, or not include the argument to select all
     drop_last=True) # to return k-1, false to return k
 
 ohe_enc.fit(X_train)
 tmp = ohe_enc.transform(X_test)
 
+ohe_enc.variables # returns the variable that will be encoded
+
+
+-----Ordinal encoding is suitable for Tree based models
+# for integer encoding using sklearn
+from sklearn.preprocessing import LabelEncoder
+from collections import defaultdict
+
+d = defaultdict(LabelEncoder)
+# Encoding the variable
+train_transformed = X_train.apply(lambda x: d[x.name].fit_transform(x))
+
+# # Using the dictionary to encode future data
+test_transformed = X_test.apply(lambda x: d[x.name].transform(x))
+#OR to apply on a certain variables
+test_transformed = X_test[['variable_names']].apply(lambda x: d[x.name].transform(x))
+
+# # Inverse the encoded
+tmp = train_transformed.apply(lambda x: d[x.name].inverse_transform(x))
+tmp.head()
+
+
+--WITH Feature-Engine
+# for integer encoding using feature-engine
+from feature_engine.categorical_encoders import OrdinalCategoricalEncoder
+ordinal_enc = OrdinalCategoricalEncoder(
+    encoding_method='arbitrary',
+    variables=['Neighborhood', 'Exterior1st', 'Exterior2nd'])
+
+ordinal_enc.fit(X_train)
+# check the mapping
+ordinal_enc.encoder_dict_
+ordinal_enc.variables
+X_train = ordinal_enc.transform(X_train)
+X_test = ordinal_enc.transform(X_test)
+
+
+--------Count/ Frequency encoding
+# suitable for Tree based models
+# - cannot handle new categories in the test set
+# - two categories will be replaced with the same number if appear equaly
 
 
 
+-------Ordered Integer Encoding
+# Suitable also for linear models
+# - cannot handle new categories
+def find_category_mappings(df, variable, target):
 
-						   
+    # first  we generate an ordered list with the labels
+    ordered_labels = X_train.groupby([variable
+                                      ])[target].mean().sort_values().index
+
+    # return the dictionary with mappings
+    return {k: i for i, k in enumerate(ordered_labels, 0)}
+
+
+def integer_encode(train, test, variable, ordinal_mapping):
+
+    X_train[variable] = X_train[variable].map(ordinal_mapping)
+    X_test[variable] = X_test[variable].map(ordinal_mapping)
+	
+	
+# and now we run a loop over the remaining categorical variables
+for variable in ['Exterior1st', 'Exterior2nd']:
+
+    mappings = find_category_mappings(X_train, variable, 'SalePrice')
+
+    integer_encode(X_train, X_test, variable, mappings)
+					      
+					      
+--# WITH Feature-Engine				      
+
+ordinal_enc = OrdinalCategoricalEncoder(
+    # NOTE that we indicate ordered in the encoding_method, otherwise it assings numbers arbitrarily
+    encoding_method='ordered',
+    variables=['Neighborhood', 'Exterior1st', 'Exterior2nd'])
+
+ordinal_enc.fit(X_train, y_train)
+X_train = ordinal_enc.transform(X_train)
+X_test = ordinal_enc.transform(X_test)
+
+ordinal_enc.encoder_dict_
+ordinal_enc.variables
+
+
+					      
+
+
+			   
 						   
 						   
 						   
