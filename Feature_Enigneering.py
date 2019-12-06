@@ -322,7 +322,22 @@ def rare_encoding(X_train, X_test, variable, tolerance):
 # Transforming						   
 for variable in ['Neighborhood', 'Exterior1st', 'Exterior2nd']:
     X_train, X_test = rare_encoding(X_train, X_test, variable, 0.05)
-						   
-						   
+	
+---With Feature-Engine
 
+from feature_engine.categorical_encoders import RareLabelCategoricalEncoder						   
+# Rare value encoder
+rare_encoder = RareLabelCategoricalEncoder(
+    tol=0.05,  # minimal percentage to be considered non-rare
+    n_categories=4, # minimal number of categories the variable should have to re-cgroup rare categories
+    variables=['Neighborhood', 'Exterior1st', 'Exterior2nd',
+               'MasVnrType', 'ExterQual', 'BsmtCond'] # variables to re-group
+)  
 																									 
+rare_encoder.fit(X_train)
+X_train = rare_encoder.transform(X_train)
+X_test = rare_encoder.transform(X_test)
+
+rare_encoder.variables
+# the encoder_dict_ is a dictionary of variable: frequent labels pair
+rare_encoder.encoder_dict_
