@@ -56,6 +56,72 @@ employed = len(data.dropna(subset=['emp_title']))
 # % of borrowers within each category
 data.dropna(subset=['emp_title']).groupby(
     ['emp_length_redefined'])['emp_length'].count().sort_values() / employe
-      
+/--------------------------						   
+						  )
+
+------- Imputation for Missing values
+
+# these are the objects we need to impute missing data
+# with sklearn
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+# first we need to make lists, indicating which features
+# will be imputed with each method
+numeric_features_mean = ['LotFrontage']
+numeric_features_median = ['MasVnrArea', 'GarageYrBlt']
+
+# Instantiating the imputers within a pipeline
+numeric_mean_imputer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='mean')),
+])
+
+numeric_median_imputer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='median')),
+])
+
+# Use ColumnTransformer
+# remainder = True to indicate that we want all columns at the end of the
+# transformation 
+preprocessor = ColumnTransformer(transformers=[
+    ('mean_imputer', numeric_mean_imputer, numeric_features_mean),
+    ('median_imputer', numeric_median_imputer, numeric_features_median)
+], remainder='passthrough')
+# now we fit the preprocessor
+preprocessor.fit(X_train)
+# and now we can impute the data
+X_train = preprocessor.transform(X_train)
+
+
+# Transform into a DataFrame
+# IF we used all features in the transformer:
+X_train = pd.DataFrame(X_train,
+             columns=features_numeric+features_categoric)
+X_test = pd.DataFrame(X_test,
+             columns=features_numeric+features_categoric)
+
+# If only some features were in the transformer:
+
+#get the reminding coulmbs:
+preprocessor.transformers_
+#put them into a list and concatinate with the other columns
+remainder_cols = [cols_to_use[c] for c in [0, 1, 2, 3, 4, 5]]
+pd.DataFrame(X_train,
+             columns = numeric_features_mean+numeric_features_median+remainder_cols).head()
+
+
+# and we can look at the parameters learnt like this:
+preprocessor.named_transformers_['mean_imputer'].named_steps['imputer'].statistics_
+preprocessor.transformers
+						   
+						   
+						   
+						   
+						   
+						   
+						   
+						   
+						   
 
 																									 
