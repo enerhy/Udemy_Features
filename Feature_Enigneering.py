@@ -284,10 +284,44 @@ ratio_enc = WoERatioCategoricalEncoder(
 
 ratio_enc.fit(X_train, y_train)						   
 X_train = ratio_enc.transform(X_train)
-X_test = ratio_enc.transform(X_test)						   
-						   
-						   
-						   
+X_test = ratio_enc.transform(X_test)		
+
+
+
+--------------Rare Labels
+
+def find_non_rare_labels(df, variable, tolerance):
+    temp = df.groupby([variable])[variable].count() / len(df)
+    non_rare = [x for x in temp.loc[temp>tolerance].index.values]
+    return non_rare
+# non-rare Labels
+find_non_rare_labels(X_train, 'Neighborhood', 0.05)
+
+# rare labels
+[x for x in X_train['Neighborhood'].unique(
+) if x not in find_non_rare_labels(X_train, 'Neighborhood', 0.05)]
+
+####
+def rare_encoding(X_train, X_test, variable, tolerance):
+
+    X_train = X_train.copy()
+    X_test = X_test.copy()
+
+    # find the most frequent category
+    frequent_cat = find_non_rare_labels(X_train, variable, tolerance)
+
+    # re-group rare labels
+    X_train[variable] = np.where(X_train[variable].isin(
+        frequent_cat), X_train[variable], 'Rare')
+    
+    X_test[variable] = np.where(X_test[variable].isin(
+        frequent_cat), X_test[variable], 'Rare')
+
+    return X_train, X_test
+
+# Transforming						   
+for variable in ['Neighborhood', 'Exterior1st', 'Exterior2nd']:
+    X_train, X_test = rare_encoding(X_train, X_test, variable, 0.05)
 						   
 						   
 
