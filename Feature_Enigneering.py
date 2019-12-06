@@ -114,6 +114,32 @@ pd.DataFrame(X_train,
 # and we can look at the parameters learnt like this:
 preprocessor.named_transformers_['mean_imputer'].named_steps['imputer'].statistics_
 preprocessor.transformers
+
+
+
+---------------CATEGORICAL VARIABLES------------
+#Scikit Learn - it transforms it into array without labels
+# we create and train the encoder
+encoder = OneHotEncoder(categories='auto',
+                       drop='first', # to return k-1, use drop=false to return k dummies
+                       sparse=False,
+                       handle_unknown='ignore') # helps deal with rare labels
+
+encoder.fit(X_train.fillna('Missing'))
+
+#One hot encoding with Feature-Engine
+ohe_enc = OneHotCategoricalEncoder(
+    top_categories=None,
+    variables=['sex', 'embarked'], # we can select which variables to encode, or not include the argument to select all
+    drop_last=True) # to return k-1, false to return k
+
+ohe_enc.fit(X_train)
+tmp = ohe_enc.transform(X_test)
+
+
+
+
+
 						   
 						   
 						   
