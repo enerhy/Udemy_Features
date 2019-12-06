@@ -118,6 +118,11 @@ preprocessor.transformers
 
 
 ---------------CATEGORICAL VARIABLES------------
+
+-----ONE-HOT-Encoding
+# Trees do not perform well in datasets with big feature spaces.
+# Thus One-Hot-Encoding is not the best option for them
+
 #Scikit Learn - it transforms it into array without labels
 # we create and train the encoder
 encoder = OneHotEncoder(categories='auto',
@@ -126,6 +131,21 @@ encoder = OneHotEncoder(categories='auto',
                        handle_unknown='ignore') # helps deal with rare labels
 
 encoder.fit(X_train.fillna('Missing'))
+
+# With Get-Dumies: If the test set is not with the same categories - this will be a problem
+def get_OHE(df):
+    df_OHE = pd.concat(
+        [df[['pclass', 'age', 'sibsp', 'parch', 'fare']],
+         pd.get_dummies(df[['sex', 'cabin', 'embarked']], drop_first=True)],
+        axis=1)
+    return df_OHE
+
+X_train_OHE = get_OHE(X_train)
+X_test_OHE = get_OHE(X_test)
+
+X_train_OHE.head()
+
+
 
 #One hot encoding with Feature-Engine
 ohe_enc = OneHotCategoricalEncoder(
@@ -222,13 +242,49 @@ ordinal_enc.encoder_dict_
 ordinal_enc.variables
 
 
-					      
+----------Encoding with Mean-Encoding
+#Replacing categorical labels with this code and method will generate missing values
+#for categories present in the test set that were not seen in the training set. 
+#Therefore it is extremely important to handle rare labels before-hand
+
+def find_category_mappings(df, variable, target):
+    return df.groupby([variable])[target].mean().to_dict()
+
+def integer_encode(train, test, variable, ordinal_mapping):
+    X_train[variable] = X_train[variable].map(ordinal_mapping)
+    X_test[variable] = X_test[variable].map(ordinal_mapping)
+	
+for variable in ['sex', 'embarked']:
+    mappings = find_category_mappings(X_train, variable, 'survived')
+    integer_encode(X_train, X_test, variable, mappings)
+
+	
+-- #With Feature-Engine
+from feature_engine.categorical_encoders import MeanCategoricalEncoder
+mean_enc = MeanCategoricalEncoder(
+    variables=['cabin', 'sex', 'embarked'])
+mean_enc.fit(X_train, y_train)
+X_train = mean_enc.transform(X_train)
+X_test = mean_enc.transform(X_test)
+
+mean_enc.encoder_dict_
+mean_enc.variables
 
 
+					      -
+---------Probability Ration Encoding
+# Only for binary classification problems
+#Replacing categorical labels with this code and method will generate missing values
+#for categories present in the test set that were not seen in the training set. 
+#Therefore it is extremely important to handle rare labels before-hand
 			   
-						   
-						   
-						   
+ratio_enc = WoERatioCategoricalEncoder(
+    encoding_method = 'ratio',
+    variables=['cabin', 'sex', 'embarked'])						   
+
+ratio_enc.fit(X_train, y_train)						   
+X_train = ratio_enc.transform(X_train)
+X_test = ratio_enc.transform(X_test)						   
 						   
 						   
 						   
