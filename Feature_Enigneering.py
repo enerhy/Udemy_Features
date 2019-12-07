@@ -288,7 +288,7 @@ X_test = ratio_enc.transform(X_test)
 
 
 
---------------Rare Labels
+--------------RARE LABELS---------
 
 def find_non_rare_labels(df, variable, tolerance):
     temp = df.groupby([variable])[variable].count() / len(df)
