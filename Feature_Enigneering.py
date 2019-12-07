@@ -494,3 +494,15 @@ treeDisc.scores_dict_['fare']
 
 train_t = treeDisc.transform(X_train)
 test_t = treeDisc.transform(X_test)
+
+
+------Scalling
+1. Standardisation
+# - sensitive to outliers
+2. Mean Normalisation
+# - sensitive to outliers
+3. MinMaxScaller
+# Mean and Variance varies - not set
+
+
+
