@@ -25,11 +25,43 @@ data['last_pymnt_dt'] = pd.to_datetime(data.last_pymnt_d)
 
 data[['issue_d', 'issue_dt', 'last_pymnt_d', 'last_pymnt_dt']].head()
 
+# Extracting week of year from date, varies from 1 to 52
+data['issue_dt_week'] = data['issue_dt'].dt.week
+
+# Extracting month from date - 1 to 12
+data['issue_dt_month'] = data['issue_dt'].dt.month
+
+# Extract quarter from date variable - 1 to 4
+data['issue_dt_quarter'] = data['issue_dt'].dt.quarter
+
+# extract year 
+data['issue_dt_year'] = data['issue_dt'].dt.year
+
+# we can extract the day in different formats
+
+# day of the week - name
+data['issue_dt_dayofweek'] = data['issue_dt'].dt.weekday_name
+
+# was the application done on the weekend?
+data['issue_dt_is_weekend'] = np.where(data['issue_dt_dayofweek'].isin(['Sunday', 'Saturday']), 1,0)
+
+# Extract the time elapsed
+data['issue_dt'] - data['last_pymnt_dt']
+(data['last_pymnt_dt'] - data['issue_dt']).dt.days.head()
+
+# or the time difference to today
+(datetime.datetime.today() - data['issue_dt']).head()
+
+# calculate number of months passed between 2 dates
+data['months_passed'] = (data['last_pymnt_dt'] - data['issue_dt']) / np.timedelta64(1, 'M')
+data['months_passed'] = np.round(data['months_passed'],0)
+
+
+
 #Pivot into a DataFrame
 data.groupby(['issue_dt', 'grade'])['loan_amnt'].sum().unstack()
 
-
-----Missing Data
+----MISSING DATA
 data.isnull().sum()
 data.isnull().mean()
 data.emp_length.value_counts() / len(data)  #to find other sorts of indication for missing data (e.g ?) 
@@ -503,6 +535,39 @@ test_t = treeDisc.transform(X_test)
 # - sensitive to outliers
 3. MinMaxScaller
 # Mean and Variance varies - not set
+
+
+------MIXES VARIABLES
+# Numeric and categorical
+1. Values are eigther numbers or strings
+# extract numerical part
+data['open_il_24m_numerical'] = pd.to_numeric(data["open_il_24m"],
+                                              errors='coerce',
+                                              downcast='integer')
+# extract categorical part
+data['open_il_24m_categorical'] = np.where(data['open_il_24m_numerical'].isnull(),
+                                           data['open_il_24m'],
+                                           np.nan)
+
+2: the observations of the variable contain numbers and strings
+# let's extract the numerical and categorical part for cabin
+data['cabin_num'] = data['cabin'].str.extract('(\d+)') # captures numerical part
+data['cabin_cat'] = data['cabin'].str[0] # captures the first letter
+
+OR
+# extract the last bit of ticket as number
+data['ticket_num'] = data['ticket'].apply(lambda s: s.split()[-1])
+data['ticket_num'] = pd.to_numeric(data['ticket_num'],
+                                   errors='coerce',
+                                   downcast='integer')
+
+# extract the first part of ticket as category
+data['ticket_cat'] = data['ticket'].apply(lambda s: s.split()[0])
+data['ticket_cat'] = np.where(data['ticket_cat'].str.isdigit(), np.nan,
+                              data['ticket_cat'])
+
+
+
 
 
 
