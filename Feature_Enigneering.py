@@ -341,3 +341,74 @@ X_test = rare_encoder.transform(X_test)
 rare_encoder.variables
 # the encoder_dict_ is a dictionary of variable: frequent labels pair
 rare_encoder.encoder_dict_
+
+
+----------DISCRETISATION---------
+----Equal width discretisation
+# with Scikit Learn
+from sklearn.preprocessing import KBinsDiscretizer
+disc = KBinsDiscretizer(n_bins=10, encode='ordinal', strategy='uniform')
+disc.fit(X_train[['age', 'fare']])
+
+train_t = disc.transform(X_train[['age', 'fare']])
+train_t = pd.DataFrame(train_t, columns = ['age', 'fare'])
+
+test_t = disc.transform(X_test[['age', 'fare']])
+test_t = pd.DataFrame(test_t, columns = ['age', 'fare'])
+
+#Visualisation
+
+t1 = train_t.groupby(['age'])['age'].count() / len(train_t)
+t2 = test_t.groupby(['age'])['age'].count() / len(test_t)
+
+tmp = pd.concat([t1, t2], axis=1)
+tmp.columns = ['train', 'test']
+tmp.plot.bar()
+plt.xticks(rotation=0)
+plt.ylabel('Number of observations per bin')
+
+#####
+
+
+---#with Feature-Engine
+disc = EqualWidthDiscretiser(bins=10, variables = ['age', 'fare'])
+disc.fit(X_train)
+train_t = disc.transform(X_train)
+test_t = disc.transform(X_test)
+
+
+
+-----Equal-Frequencz discrtisation
+--#with Feature-Engine
+disc = EqualFrequencyDiscretiser(q=10, variables = ['age', 'fare'])
+disc.fit(X_train)
+train_t = disc.transform(X_train)
+test_t = disc.transform(X_test)
+
+disc.binner_dict_
+
+--#witg Scikit Learn
+disc = KBinsDiscretizer(n_bins=10, encode='ordinal', strategy='quantile')
+disc.fit(X_train[['age', 'fare']])
+train_t = disc.transform(X_train[['age', 'fare']])
+train_t = pd.DataFrame(train_t, columns = ['age', 'fare'])
+
+disc.bin_edges_
+
+
+----K-means discretisation
+# - outliers may influence the centroid
+# good to combine with categorical encoding
+
+from sklearn.preprocessing import KBinsDiscretizer
+disc = KBinsDiscretizer(n_bins=5, encode='ordinal', strategy='kmeans')
+disc.fit(X_train[['age', 'fare']])
+train_t = disc.transform(X_train[['age', 'fare']])
+train_t = pd.DataFrame(train_t, columns = ['age', 'fare'])
+train_t.head()
+
+disc.bin_edges_
+
+
+
+
