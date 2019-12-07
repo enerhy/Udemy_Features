@@ -1,3 +1,106 @@
+------FEATURE ENGINEERING STEPS
+---1. Analyse variable types and values and characteristics
+# Data types - # make list of variables  types
+data.dtypes
+
+# numerical: discrete vs continuous
+discrete = [var for var in data.columns if data[var].dtype!='O' and var!='survived' and data[var].nunique()<10]
+continuous = [var for var in data.columns if data[var].dtype!='O' and var!='survived' and var not in discrete]
+
+# mixed
+mixed = ['cabin']
+
+# categorical
+categorical = [var for var in data.columns if data[var].dtype=='O' and var not in mixed]
+
+
+# Missing Data
+data.isnull().mean()
+# Cardinality
+data[categorical+mixed].nunique()
+# Outliers
+data[continuous].boxplot(figsize=(10,4))
+# outliers in discrete
+data[discrete].boxplot(figsize=(10,4))
+# feature magnitude
+data.describe()
+
+
+
+# Separating mixed values
+data['cabin_num'] = data['cabin'].str.extract('(\d+)') # captures numerical part
+data['cabin_num'] = data['cabin_num'].astype('float')
+data['cabin_cat'] = data['cabin'].str[0] # captures the first letter
+
+# show dataframe
+data.head()
+
+# drop original mixed
+data.drop(['cabin'], axis=1, inplace=True)
+
+-----HERE SPLITTING IN TRAIN AND TEST
+
+# MIssing Data
+# numerical
+X_train.select_dtypes(exclude='O').isnull().mean()
+# categorical
+X_train.select_dtypes(include='O').isnull().mean()
+
+# Cardinality and rare labels
+# check cardinality again
+X_train[['cabin_cat', 'sex', 'embarked']].nunique()
+# check variable frequency
+var = 'cabin_cat'
+(X_train[var].value_counts() / len(X_train)).sort_values()
+
+
+# Variables Distribution
+X_train.select_dtypes(exclude='O').hist(bins=30, figsize=(8,8))
+plt.show()
+
+
+---2. BUILDING THE PIPLINE
+
+titanic_pipe = Pipeline([
+
+    # missing data imputation - section 4
+    ('imputer_num',
+     mdi.ArbitraryNumberImputer(arbitrary_number=-1,
+                                variables=['age', 'fare', 'cabin_num'])),
+    ('imputer_cat',
+     mdi.CategoricalVariableImputer(variables=['embarked', 'cabin_cat'])),
+
+    # categorical encoding - section 6
+    ('encoder_rare_label',
+     ce.RareLabelCategoricalEncoder(tol=0.01,
+                                    n_categories=6,
+                                    variables=['cabin_cat'])),
+    ('categorical_encoder',
+     ce.OrdinalCategoricalEncoder(encoding_method='ordered',
+                                  variables=['cabin_cat', 'sex', 'embarked'])),
+
+    # Gradient Boosted machine
+    ('gbm', GradientBoostingClassifier(random_state=0))
+])
+
+
+# let's fit the pipeline and make predictions
+titanic_pipe.fit(X_train, y_train)
+
+X_train_preds = titanic_pipe.predict_proba(X_train)[:,1]
+X_test_preds = titanic_pipe.predict_proba(X_test)[:,1]
+
+
+# let's explore the importance of the features
+importance = pd.Series(titanic_pipe.named_steps['gbm'].feature_importances_)
+importance.index = data.drop('survived', axis=1).columns
+importance.sort_values(inplace=True, ascending=False)
+importance.plot.bar(figsize=(12,6))
+
+
+
+
+
 
 # Introducing nan values, where another sign indicates that
 data = data.replace('?', np.nan)
