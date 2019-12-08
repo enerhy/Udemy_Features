@@ -268,6 +268,16 @@ preprocessor.transformers
 
 ---------------CATEGORICAL VARIABLES------------
 
+# Identification
+# plot number of categories per categorical variable
+data[categorical].nunique().plot.bar(figsize=(10,6))
+plt.title('CARDINALITY: Number of categories in categorical variables')
+plt.xlabel('Categorical variables')
+plt.ylabel('Number of different categories')
+
+
+
+
 -----ONE-HOT-Encoding
 # Trees do not perform well in datasets with big feature spaces.
 # Thus One-Hot-Encoding is not the best option for them
@@ -721,8 +731,17 @@ data['ticket_cat'] = np.where(data['ticket_cat'].str.isdigit(), np.nan,
 # list of variables that contain year information
 year_vars = [var for var in numerical if 'Yr' in var or 'Year' in var]
 
-year_vars
+# function to calculate elapsed time
+def elapsed_years(df, var):
+    # capture difference between year variable and
+    # year the house was sold
+    
+    df[var] = df['YrSold'] - df[var]
+    return df
 
+for var in ['YearBuilt', 'YearRemodAdd', 'GarageYrBlt']:
+    X_train = elapsed_years(X_train, var)
+    X_test = elapsed_years(X_test, var)
 
 
 
