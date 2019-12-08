@@ -3,9 +3,23 @@
 # Data types - # make list of variables  types
 data.dtypes
 
-# numerical: discrete vs continuous
+# numerical: discrete vs continuous - SELECTION
 discrete = [var for var in data.columns if data[var].dtype!='O' and var!='survived' and data[var].nunique()<10]
+#OR 
+''''for var in numerical:
+    if len(data[var].unique()) < 20 and var not in year_vars:
+        print(var, ' values: ', data[var].unique())
+        discrete.append(var)
+print()
+print('There are {} discrete variables'.format(len(discrete)))''''
+
 continuous = [var for var in data.columns if data[var].dtype!='O' and var!='survived' and var not in discrete]
+#OR
+'''numerical = [var for var in numerical if var not in discrete and var not in [
+    'Id', 'SalePrice'] and var not in year_vars]
+
+print('There are {} numerical and continuous variables'.format(len(numerical)))'''
+
 
 # mixed
 mixed = ['cabin']
@@ -670,6 +684,11 @@ data['ticket_cat'] = np.where(data['ticket_cat'].str.isdigit(), np.nan,
                               data['ticket_cat'])
 
 
+# Capture variables that contains certain Characters / Letters
+# list of variables that contain year information
+year_vars = [var for var in numerical if 'Yr' in var or 'Year' in var]
+
+year_vars
 
 
 
