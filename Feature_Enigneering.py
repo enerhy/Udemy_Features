@@ -601,6 +601,17 @@ upper_boundary, lower_boundary = find_skewed_boundaries(boston, 'LSTAT', 1.5)
 upper_boundary, lower_boundary
 
 
+# Capping Quantiles
+def find_boundaries(df, variable):
+
+    # the boundaries are the quantiles
+
+    lower_boundary = df[variable].quantile(0.05)
+    upper_boundary = df[variable].quantile(0.95)
+
+    return upper_boundary, lower_boundary
+
+
 # Printing the outliers
 for var in df[continuous]:
     # define figure size
@@ -615,7 +626,28 @@ for var in df[continuous]:
         round(len(df[df[var] < lower_boundary])/len(df), 2)))
 
 	
-# Replacing 
+# CAPPING
+oston['RM']= np.where(boston['RM'] > RM_upper_limit, RM_upper_limit,
+                       np.where(boston['RM'] < RM_lower_limit, RM_lower_limit, boston['RM']))
+	
+#My function
+for var in df[continuous]:
+    # define figure size
+    print('For feature: ' + str(var))
+    print('total: {}'.format(len(df)))  
+    
+    upper_boundary, lower_boundary = find_skewed_boundaries(df, var, 1.5)
+    print('over the upper bound: {}'.format(
+        round(len(df[df[var] > upper_boundary])/len(df), 2)))
+    print()
+    print('under the lower bound: {}'.format(
+        round(len(df[df[var] < lower_boundary])/len(df), 2)))
+    
+    df[var]= np.where(df[var] > upper_boundary, upper_boundary,
+                       np.where(df[var] < lower_boundary, lower_boundary, df[var]))
+	
+	
+	
 	
 	
 	
