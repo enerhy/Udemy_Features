@@ -597,6 +597,30 @@ def find_skewed_boundaries(df, variable, distance):
 
     return upper_boundary, lower_boundary
 
+upper_boundary, lower_boundary = find_skewed_boundaries(boston, 'LSTAT', 1.5)
+upper_boundary, lower_boundary
+
+
+# Printing the outliers
+for var in df[continuous]:
+    # define figure size
+    print('For feature: ' + str(var))
+    print('total: {}'.format(len(df)))  
+    
+    upper_boundary, lower_boundary = find_skewed_boundaries(df, var, 1.5)
+    print('over the upper bound: {}'.format(
+        round(len(df[df[var] > upper_boundary])/len(df), 2)))
+    print()
+    print('under the lower bound: {}'.format(
+        round(len(df[df[var] < lower_boundary])/len(df), 2)))
+
+	
+# Replacing 
+	
+	
+	
+	
+	
 
 
 ---# Transforming						   
