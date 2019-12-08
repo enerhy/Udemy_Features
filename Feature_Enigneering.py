@@ -112,6 +112,39 @@ importance.sort_values(inplace=True, ascending=False)
 importance.plot.bar(figsize=(12,6))
 
 
+--USING GRIDSEARCH IN THE PIPELINE
+param_grid = {
+    # try different feature engineering parameters
+    'imputer_num__arbitrary_number': [-1, 99],
+    'encoder_rare_label__tol': [0.1, 0.2],
+    'categorical_encoder__encoding_method': ['ordered', 'arbitrary'],
+    
+    # try different gradient boosted tree model paramenters
+    'gbm__max_depth': [None, 1, 3],
+}
+
+# now we set up the grid search with cross-validation
+grid_search = GridSearchCV(titanic_pipe, param_grid,
+                           cv=5, iid=False, n_jobs=-1, scoring='roc_auc')
+
+# and now we train over all the possible combinations of the parameters above
+grid_search.fit(X_train, y_train)
+
+# and we print the best score over the train set
+print(("best roc-auc from grid search: %.3f"
+       % grid_search.score(X_train, y_train)))
+
+# we can print the best estimator parameters like this
+grid_search.best_estimator_
+# and find the best fit parameters like this
+grid_search.best_params_
+# here we can see all the combinations evaluated during the gridsearch
+grid_search.cv_results_['params']
+# and here the scores for each of one of the above combinations
+grid_search.cv_results_['mean_test_score']
+print(("best linear regression from grid search: %.3f"
+       % grid_search.score(X_test, y_test)))
+
 
 
 
