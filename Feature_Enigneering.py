@@ -468,7 +468,40 @@ def rare_encoding(X_train, X_test, variable, tolerance):
 
     return X_train, X_test
 
-# Transforming						   
+
+
+----OUTLIERS
+# let's make boxplots to visualise outliers in the continuous variables 
+# and histograms to get an idea of the distribution
+
+for var in numerical:
+    plt.figure(figsize=(6,4))
+    plt.subplot(1, 2, 1)
+    fig = data.boxplot(column=var)
+    fig.set_title('')
+    fig.set_ylabel(var)
+    
+    plt.subplot(1, 2, 2)
+    fig = data[var].hist(bins=20)
+    fig.set_ylabel('Number of houses')
+    fig.set_xlabel(var)
+
+    plt.show()
+
+
+# outlies in discrete variables
+for var in discrete:
+    (data.groupby(var)[var].count() / np.float(len(data))).plot.bar()
+    plt.ylabel('Percentage of observations per label')
+    plt.title(var)
+    plt.show()
+
+
+
+
+
+
+---# Transforming						   
 for variable in ['Neighborhood', 'Exterior1st', 'Exterior2nd']:
     X_train, X_test = rare_encoding(X_train, X_test, variable, 0.05)
 	
