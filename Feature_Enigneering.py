@@ -531,6 +531,33 @@ for var in numerical:
 
     plt.show()
 
+# OR
+# function to create histogram, Q-Q plot and
+# boxplot
+def diagnostic_plots(df, variable):
+    # function takes a dataframe (df) and
+    # the variable of interest as arguments
+
+    # define figure size
+    plt.figure(figsize=(16, 4))
+
+    # histogram
+    plt.subplot(1, 3, 1)
+    sns.distplot(df[variable], bins=30)
+    plt.title('Histogram')
+
+    # Q-Q plot
+    plt.subplot(1, 3, 2)
+    stats.probplot(df[variable], dist="norm", plot=pylab)
+    plt.ylabel('RM quantiles')
+
+    # boxplot
+    plt.subplot(1, 3, 3)
+    sns.boxplot(y=df[variable])
+    plt.title('Boxplot')
+
+    plt.show()
+
 
 # outlies in discrete variables
 for var in discrete:
@@ -540,7 +567,35 @@ for var in discrete:
     plt.show()
 
 
+	
+#OUTLIERS DETECTION
+# function to find upper and lower boundaries for normally distributed variables
 
+def find_normal_boundaries(df, variable):
+    # calculate the boundaries outside which sit the outliers
+    # for a Gaussian distribution
+
+    upper_boundary = df[variable].mean() + 3 * df[variable].std()
+    lower_boundary = df[variable].mean() - 3 * df[variable].std()
+
+    return upper_boundary, lower_boundary
+
+# For skewed variables
+def find_skewed_boundaries(df, variable, distance):
+
+    # Let's calculate the boundaries outside which sit the outliers
+    # for skewed distributions
+
+    # distance passed as an argument, gives us the option to
+    # estimate 1.5 times or 3 times the IQR to calculate
+    # the boundaries.
+
+    IQR = df[variable].quantile(0.75) - df[variable].quantile(0.25)
+
+    lower_boundary = df[variable].quantile(0.25) - (IQR * distance)
+    upper_boundary = df[variable].quantile(0.75) + (IQR * distance)
+
+    return upper_boundary, lower_boundary
 
 
 
