@@ -481,6 +481,30 @@ X_test = ratio_enc.transform(X_test)
 
 
 --------------RARE LABELS---------
+# Visualise Example
+total_houses = len(df)
+
+# for each categorical variable
+for col in categorical:
+
+    # count the number of houses per category
+    # and divide by total houses
+
+    # aka percentage of houses per category
+
+    temp_df = pd.Series(df[col].value_counts() / total_houses)
+
+    # make plot with the above percentages
+    fig = temp_df.sort_values(ascending=False).plot.bar()
+    fig.set_xlabel(col)
+
+    # add a line at 5 % to flag the threshold for rare categories
+    fig.axhline(y=0.05, color='red')
+    fig.set_ylabel('Percentage of houses')
+    plt.show()
+
+
+
 
 def find_non_rare_labels(df, variable, tolerance):
     temp = df.groupby([variable])[variable].count() / len(df)
