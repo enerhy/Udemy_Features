@@ -510,7 +510,8 @@ for col in cols:
     print()
 
 
----
+--Regrouping
+-# With Pandas
 
 def find_non_rare_labels(df, variable, tolerance):
     temp = df.groupby([variable])[variable].count() / len(df)
@@ -540,6 +541,21 @@ def rare_encoding(X_train, X_test, variable, tolerance):
         frequent_cat), X_test[variable], 'Rare')
 
     return X_train, X_test
+
+# Transforming
+for variable in ['Neighborhood', 'Exterior1st', 'Exterior2nd']:
+    X_train, X_test = rare_encoding(X_train, X_test, variable, 0.05)
+
+
+-# With Feature-Engine
+# Rare value encoder
+rare_encoder = RareLabelCategoricalEncoder(
+    tol=0.05,  # minimal percentage to be considered non-rare
+    n_categories=4, # minimal number of categories the variable should have to re-cgroup rare categories
+    variables=['Neighborhood', 'Exterior1st', 'Exterior2nd',
+               'MasVnrType', 'ExterQual', 'BsmtCond'] # variables to re-group
+)  
+
 
 
 
