@@ -503,8 +503,14 @@ for col in categorical:
     fig.set_ylabel('Percentage of houses')
     plt.show()
 
+# Checking non-visual
+for col in cols:
+    
+    print(X_train.groupby(col)[col].count() / len(X_train)) # frequency
+    print()
 
 
+---
 
 def find_non_rare_labels(df, variable, tolerance):
     temp = df.groupby([variable])[variable].count() / len(df)
