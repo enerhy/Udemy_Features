@@ -409,6 +409,9 @@ def find_category_mappings(df, variable, target):
     # first  we generate an ordered list with the labels
     ordered_labels = X_train.groupby([variable
                                       ])[target].mean().sort_values().index
+ #---IF Y is already separated of X
+ #    ordered_labels=pd.concat((X_train_droped, y_train), axis=1).groupby([var
+ #	])[target].mean().sort_values().index
 
     # return the dictionary with mappings
     return {k: i for i, k in enumerate(ordered_labels, 0)}
