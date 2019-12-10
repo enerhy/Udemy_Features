@@ -278,10 +278,12 @@ X_train = preprocessor.transform(X_train)
 
 # Transform into a DataFrame
 # IF we used all features in the transformer:
-X_train = pd.DataFrame(X_train,
-             columns=features_numeric+features_categoric)
-X_test = pd.DataFrame(X_test,
-             columns=features_numeric+features_categoric)
+X_train_droped_1 = pd.DataFrame(X_train_droped, columns=categorical_dropped+continuous+discrete)
+X_test_droped_1 = pd.DataFrame(X_test_droped, columns=categorical_dropped+continuous+discrete)
+# To set in the initial Order
+X_train_droped_2 = X_train_droped_1[columns_after_dropping]
+
+
 
 # If only some features were in the transformer:
 
