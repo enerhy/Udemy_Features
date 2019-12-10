@@ -481,6 +481,24 @@ X_test = ratio_enc.transform(X_test)
 
 
 --------------RARE LABELS---------
+# Check for rare labels
+for col in cols:
+    
+    print(X_train
+	  .groupby(col)[col].count() / len(X_train)) # frequency
+    print()
+
+#OR
+multi_cat_cols = []
+for col in X_train.columns:
+    if X_train[col].dtypes =='O': # if variable  is categorical
+        if X_train[col].nunique() > 10: # and has more than 10 categories
+            multi_cat_cols.append(col)  # add to the list        
+            print(X_train.groupby(col)[col].count()/ len(X_train)) # and print the percentage of observations within each category
+            print()
+		
+
+
 # Visualise Example
 total_houses = len(df)
 
