@@ -317,7 +317,14 @@ plt.title('CARDINALITY: Number of categories in categorical variables')
 plt.xlabel('Categorical variables')
 plt.ylabel('Number of different categories')
 
-
+#Explore original relationship between categorical variables and target
+for var in ['Neighborhood', 'Exterior1st', 'Exterior2nd']:
+    
+    fig = plt.figure()
+    fig = X_train.groupby([var])['SalePrice'].mean().plot()
+    fig.set_title('Relationship between {} and SalePrice'.format(var))
+    fig.set_ylabel('Mean SalePrice')
+    plt.show()
 
 
 -----ONE-HOT-Encoding
