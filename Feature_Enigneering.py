@@ -216,6 +216,13 @@ data.isnull().sum()
 data.isnull().mean()
 data.emp_length.value_counts() / len(data)  #to find other sorts of indication for missing data (e.g ?) 
 
+#Print features with missing values
+# examine percentage of missing values
+for col in numerical+year_vars:
+    if X_train[col].isnull().mean() > 0:
+        print(col, X_train[col].isnull().mean())
+	
+
 # Check for Missing Data Not At Random (MNAR) - systematic missing data
 # creating a binary variable indicating whether a value is missing
 data['cabin_null'] = np.where(data['cabin'].isnull(), 1, 0)
