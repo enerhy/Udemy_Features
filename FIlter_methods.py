@@ -59,7 +59,7 @@ run_logistic(scaler.transform(X_train_original.drop(labels=['ID'], axis=1)),
 
 #Constant Features
 #Check for null values
-[col for col in data.columns if data[col].isnull.sum() > 0]
+[col for col in data.columns if data[col].isnull().sum() > 0]
 
 ---### Using variance threshold from sklearn
 #threshold=0.01 indicates variance of 1%
