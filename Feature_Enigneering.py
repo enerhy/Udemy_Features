@@ -971,4 +971,60 @@ for var in ['YearBuilt', 'YearRemodAdd', 'GarageYrBlt']:
     X_test = elapsed_years(X_test, var)
 
 
+-------Logaritimic Transformation
+from sklearn.preprocessing import FunctionTransformer, PowerTransformer
+import scipy.stats as stats
+
+# Diagnostic
+# plot the histograms to have a quick look at the variable distribution
+# histogram and Q-Q plots
+
+def diagnostic_plots(df, variable):
+    
+    # function to plot a histogram and a Q-Q plot
+    # side by side, for a certain variable
+    
+    plt.figure(figsize=(15,6))
+    plt.subplot(1, 2, 1)
+    df[variable].hist(bins=30)
+
+    plt.subplot(1, 2, 2)
+    stats.probplot(df[variable], dist="norm", plot=plt)
+
+    plt.show()
+	
+#Then:
+# create a log transformer
+transformer = FunctionTransformer(np.log, validate=True)	
+continuous_positive = []
+for var in continuous_noId:
+    if X_train[var].min()>0:
+        if var not 
+        a = X_train[var].min()
+        continuous_positive.append(var)
+print(continuous_positive)
+
+X_train_loged = transformer.transform(X_train[continuous_positive])
+X_test_loged = transformer.transform(X_test[continuous_positive])
+
+X_train_loged = pd.DataFrame(X_train_loged, columns=continuous_positive)
+X_test_loged = pd.DataFrame(X_test_loged, columns=continuous_positive)
+
+X_train.drop(columns=continuous_positive, inplace=True)
+#And for X_test as well
+
+X_train = pd.concat((X_train, X_train_loged), axis=1)
+X_test = pd.concat((X_test, X_test_loged), axis=1)
+
+
+
+	
+
+
+
+
+	
+	
+	
+
 
