@@ -272,14 +272,26 @@ scaler.fit(X_train.fillna(0))
 sel_ = SelectFromModel(LogisticRegression(C=1, penalty='l1'))
 sel_.fit(scaler.transform(X_train.fillna(0)), y_train)
 
-#2 Transform train and test with the 
+# Get info of the features to be removed
+selected_feat = X_train.columns[(sel_.get_support())]
+removed_feature = [var for var in X_train.columns if var not in selected_feat]
+
+print('total features: {}'.format((X_train.shape[1])))
+print('selected features: {}'.format(len(selected_feat)))
+print('removed features: {}'.format(removed_feature))
+
+#OR
+#2 Get the coulmns dropped / selected
+removed_feats = X_train.columns[(sel_.estimator_.coef_ == 0).ravel().tolist()] #Didnt work
+selected_feat = X_train.columns[(sel_.get_support())]
+
+
+#3 Transform train and test with the 
 X_train_selected = sel_.transform(X_train.fillna(0))
 X_test_selected = sel_.transform(X_test.fillna(0))
 X_train_selected.shape, X_test_selected.shape
 
-#3 Get the coulmns dropped / selected
-removed_feats = X_train.columns[(sel_.estimator_.coef_ == 0).ravel().tolist()]
-selected_feat = X_train.columns[(sel_.get_support())]
+
 
 
 
