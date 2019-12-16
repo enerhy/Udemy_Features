@@ -222,7 +222,12 @@ for col in numerical+year_vars:
     if X_train[col].isnull().mean() > 0:
         print(col, X_train[col].isnull().mean())
 	
-
+#List of features containing empty values
+missing_values = [var for var in df.columns if df[var].isnull().sum() > 0]
+	
+# Building an indicator matrix for the train set
+missing_matrix_X_train = X_train[missing_values].isnull().astype(int).add_suffix('_indicator')	
+	
 # Check for Missing Data Not At Random (MNAR) - systematic missing data
 # creating a binary variable indicating whether a value is missing
 data['cabin_null'] = np.where(data['cabin'].isnull(), 1, 0)
