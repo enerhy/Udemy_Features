@@ -1,7 +1,10 @@
-# Random Forest
+------------------REGRESSION-------------
+---------Random Forest----------
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 
+# Result Function:
+# We can add a predictor instead of having it inside the function
 def run_RandomForest(X_train, X_test, ytrain, ytest):
     regressor_rf = RandomForestRegressor(max_depth=15, min_samples_split=15, random_state=0)
     regressor_rf.fit(X_train, ytrain)
@@ -18,6 +21,7 @@ def run_RandomForest(X_train, X_test, ytrain, ytest):
     print('test mse: {}'.format(mean_squared_error(ytest, X_test_preds)))
     print('test rmse: {}'.format(sqrt(mean_squared_error(ytest, X_test_preds))))
     print('test r2: {}'.format(r2_score(ytest, X_test_preds)))
+    
     
 -----GRIDS SEARCH Function---
  # Random Forest
@@ -41,5 +45,17 @@ def grid_search_RF(Xtrain, ytrain):
     gridsearch.fit(Xtrain, ytrain)
     
     return gridsearch.best_params_, gridsearch.best_score_, gridsearch.best_estimator_
+    
+    best_params, best_score, predictor = grid_search_RF(X_train_outliers, y_train)
+    
+    
+    ----# Feature Importance
+    importance = pd.Series(np.abs(xgb.feature_importances_))
+    importance.index = X_train_outliers.columns
+    importance.sort_values(inplace=True, ascending=False)
+    importance.plot.bar(figsize=(18,6))
+    plt.title("Feature Importance")
+    
+    
     
     
