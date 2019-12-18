@@ -242,6 +242,25 @@ importance.columns = ['feature', 'importance']
 importance.sort_values(by='importance', ascending=False)
 
 
+----Filtering based on Statistical Measures
+# It consider the dependency between ONE Feature and the Target
+# Does not consider, if a variable is predictive in combination with another variable
+
+from sklearn.feature_selection import mutual_info_regression
+from sklearn.feature_selection import SelectKBest, SelectPercentile
+
+
+mi = mutual_info_regression(X_train, y_train)
+mi = pd.Series(mi)
+mi.index = X_train.columns
+mi.sort_values(ascending=False)
+mi.sort_values(ascending=False).plot.bar(figsize=(20,8))
+
+# Selecting some part of the set
+sel_ = SelectPercentile(mutual_info_regression, percentile=10).fit(X_train, y_train)
+X_train.columns[sel_.get_support()]
+
+
 -----STATISTICAL RANKING FILTERING
 
 #ROC
@@ -299,6 +318,9 @@ X_train_selected.shape, X_test_selected.shape
 # select features using the impotance derived from
 # random forests
 
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.feature_selection import SelectFromModel
+
 sel_ = SelectFromModel(RandomForestClassifier(n_estimators=400))
 sel_.fit(X_train, y_train)
 
@@ -311,6 +333,24 @@ X_test_rf = pd.DataFrame(sel_.transform(X_test))
 # add the columns name
 X_train_rf.columns = X_train.columns[(sel_.get_support())]
 X_test_rf.columns = X_train.columns[(sel_.get_support())]
+
+
+---For Regression
+# SelectFrom model will select those features which importance
+# is greater than the mean importance of all the features
+# by default, but you can alter this threshold if you want to
+sel_ = SelectFromModel(RandomForestRegressor(n_estimators=100))
+sel_.fit(X_train.fillna(0), y_train)
+
+# let's make a list and count the selected features
+selected_feat = X_train.columns[(sel_.get_support())]
+len(selected_feat)
+
+pd.Series(sel_.estimator_.feature_importances_.ravel()).hist()
+
+
+
+
 
 
 
